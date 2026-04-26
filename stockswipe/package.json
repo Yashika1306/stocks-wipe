@@ -1,0 +1,11 @@
+{
+  "name": "stockswipe-api",
+  "version": "1.0.0",
+  "main": "mock-server.js",
+  "scripts": {
+    "start": "node mock-server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
