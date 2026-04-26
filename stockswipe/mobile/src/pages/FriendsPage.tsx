@@ -51,7 +51,7 @@ export function FriendsPage() {
   }, []);
 
   const shareLink = async () => {
-    if (navigator.share) {
+    if ('share' in navigator) {
       try {
         await navigator.share({
           title: 'Join my StockSwipe circle!',
@@ -137,7 +137,7 @@ export function FriendsPage() {
               opacity: shareUrl ? 1 : 0.5,
             }}
           >
-            {copied ? '✓ Copied!' : navigator.share ? '↗ Share' : '📋 Copy Link'}
+            {copied ? '✓ Copied!' : 'share' in navigator ? '↗ Share' : '📋 Copy Link'}
           </button>
         </div>
 
