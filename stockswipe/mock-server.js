@@ -101,19 +101,26 @@ const MOCK_PORTFOLIO = {
 // ── Leaderboard ───────────────────────────────────────────────────────────────
 const MOCK_LEADERBOARD = {
   entries: [
-    { rank:1,  display_name:'BullishBull',   total_return:24.3, swipe_count:342, badge:'👑' },
-    { rank:2,  display_name:'AlphaSeeker',   total_return:18.7, swipe_count:289, badge:'🥈' },
-    { rank:3,  display_name:'QuietHedge',    total_return:15.2, swipe_count:201, badge:'🥉' },
-    { rank:4,  display_name:'MomentumKing',  total_return:12.8, swipe_count:188, badge:'' },
-    { rank:5,  display_name:'ValueHunter',   total_return: 9.4, swipe_count:156, badge:'' },
-    { rank:6,  display_name:'You',           total_return: 4.1, swipe_count: 47, badge:'' },
-    { rank:7,  display_name:'TechBro2026',   total_return: 2.9, swipe_count:134, badge:'' },
-    { rank:8,  display_name:'DividentDave',  total_return: 1.2, swipe_count: 98, badge:'' },
-    { rank:9,  display_name:'ContrarianCal', total_return:-1.5, swipe_count: 77, badge:'' },
-    { rank:10, display_name:'NewbieNick',    total_return:-3.8, swipe_count: 23, badge:'' },
+    { rank:1,  display_name:'Arjun Mehta',       total_return:31.2, swipe_count:487, badge:'👑' },
+    { rank:2,  display_name:'Priya Sharma',      total_return:26.8, swipe_count:412, badge:'🥈' },
+    { rank:3,  display_name:'Rohan Kapoor',      total_return:22.4, swipe_count:378, badge:'🥉' },
+    { rank:4,  display_name:'Ananya Iyer',       total_return:18.9, swipe_count:341, badge:'' },
+    { rank:5,  display_name:'Vikram Nair',       total_return:16.3, swipe_count:298, badge:'' },
+    { rank:6,  display_name:'Jhanvi Patel',      total_return:14.1, swipe_count:267, badge:'' },
+    { rank:7,  display_name:'Siddharth Rao',     total_return:11.7, swipe_count:234, badge:'' },
+    { rank:8,  display_name:'Kavya Reddy',       total_return: 9.2, swipe_count:198, badge:'' },
+    { rank:9,  display_name:'Yashika Varshney',  total_return: 7.8, swipe_count:156, badge:'' },
+    { rank:10, display_name:'Aditya Bhatia',     total_return: 6.4, swipe_count:143, badge:'' },
+    { rank:11, display_name:'Neha Gupta',        total_return: 4.9, swipe_count:121, badge:'' },
+    { rank:12, display_name:'Karan Malhotra',    total_return: 3.1, swipe_count:109, badge:'' },
+    { rank:13, display_name:'Shreya Joshi',      total_return: 1.8, swipe_count: 94, badge:'' },
+    { rank:14, display_name:'Rahul Singhania',   total_return: 0.4, swipe_count: 78, badge:'' },
+    { rank:15, display_name:'Pooja Agarwal',     total_return:-1.2, swipe_count: 62, badge:'' },
+    { rank:16, display_name:'Manish Tiwari',     total_return:-2.7, swipe_count: 51, badge:'' },
+    { rank:17, display_name:'Divya Krishnan',    total_return:-4.1, swipe_count: 39, badge:'' },
   ],
-  your_rank: 6,
-  week_reset: '2026-04-28',
+  your_rank: 9,
+  week_reset: '2026-05-10',
 };
 
 // ── Friends ───────────────────────────────────────────────────────────────────
@@ -124,10 +131,12 @@ const friendStore = {
   // userId → array of friend objects
   friends: {
     'mock-user-001': [
-      { id:'user-jhanvi',  display_name:'Jhanvi',   avatar_color:'#a855f7', streak_days:12, mutual_streak:9,  total_return:11.4, swipe_count:134, last_active:'2026-04-25', is_online:true  },
-      { id:'user-alex',    display_name:'Alex',     avatar_color:'#3d8ef0', streak_days:5,  mutual_streak:4,  total_return: 6.8, swipe_count: 89, last_active:'2026-04-24', is_online:false },
-      { id:'user-sam',     display_name:'Sam',      avatar_color:'#00c9a7', streak_days:21, mutual_streak:14, total_return: 8.2, swipe_count:201, last_active:'2026-04-25', is_online:true  },
-      { id:'user-morgan',  display_name:'Morgan',   avatar_color:'#f39c12', streak_days:3,  mutual_streak:2,  total_return:-2.1, swipe_count: 45, last_active:'2026-04-23', is_online:false },
+      { id:'user-jhanvi',    display_name:'Jhanvi Patel',    avatar_color:'#a855f7', streak_days:12, mutual_streak:9,  total_return:14.1, swipe_count:267, last_active:'2026-04-25', is_online:true  },
+      { id:'user-priya',     display_name:'Priya Sharma',    avatar_color:'#3d8ef0', streak_days:18, mutual_streak:11, total_return:26.8, swipe_count:412, last_active:'2026-04-25', is_online:true  },
+      { id:'user-rohan',     display_name:'Rohan Kapoor',    avatar_color:'#00c9a7', streak_days:21, mutual_streak:14, total_return:22.4, swipe_count:378, last_active:'2026-04-25', is_online:false },
+      { id:'user-ananya',    display_name:'Ananya Iyer',     avatar_color:'#f39c12', streak_days:8,  mutual_streak:5,  total_return:18.9, swipe_count:341, last_active:'2026-04-24', is_online:false },
+      { id:'user-vikram',    display_name:'Vikram Nair',     avatar_color:'#e74c3c', streak_days:5,  mutual_streak:3,  total_return:16.3, swipe_count:298, last_active:'2026-04-23', is_online:false },
+      { id:'user-siddharth', display_name:'Siddharth Rao',   avatar_color:'#1abc9c', streak_days:14, mutual_streak:7,  total_return:11.7, swipe_count:234, last_active:'2026-04-24', is_online:true  },
     ],
   },
 };
