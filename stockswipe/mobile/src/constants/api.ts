@@ -9,4 +9,5 @@ export const ENDPOINTS = {
   swipe:       '/swipe',
   portfolio:   (userId: string) => `/portfolio/${userId}`,
   leaderboard: '/leaderboard',
+  aiChat:      '/ai/chat',
 } as const;

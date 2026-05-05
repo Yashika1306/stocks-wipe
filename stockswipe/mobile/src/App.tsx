@@ -1,6 +1,7 @@
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { AIAssistant } from './components/AIAssistant';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { SwipePage } from './pages/SwipePage';
@@ -26,6 +27,7 @@ function AuthLayout() {
           <Outlet />
         </ErrorBoundary>
       </main>
+      <AIAssistant />
     </>
   );
 }

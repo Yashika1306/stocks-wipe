@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routers import feed, swipe, portfolio, leaderboard, auth
+from api.routers import feed, swipe, portfolio, leaderboard, auth, coins, ai
 from api.middleware.disclaimer import DisclaimerMiddleware
 from api.database import engine
 from api.models.base import Base
@@ -31,6 +31,8 @@ app.include_router(feed.router, prefix="/feed", tags=["feed"])
 app.include_router(swipe.router, prefix="/swipe", tags=["swipe"])
 app.include_router(portfolio.router, prefix="/portfolio", tags=["portfolio"])
 app.include_router(leaderboard.router, prefix="/leaderboard", tags=["leaderboard"])
+app.include_router(coins.router, prefix="/coins", tags=["coins"])
+app.include_router(ai.router, prefix="/ai", tags=["ai"])
 
 
 @app.get("/health")
