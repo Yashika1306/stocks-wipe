@@ -3,8 +3,22 @@
  * Run: node mock-server.js
  */
 const http = require('http');
+const fs = require('fs');
+const path = require('path');
 const PORT = process.env.PORT || 8000;
 const DISCLAIMER = 'This is not investment advice. All portfolios are simulated.';
+
+// ── .env loader (no deps) ─────────────────────────────────────────────────────
+(() => {
+  try {
+    const envPath = path.join(__dirname, '.env');
+    if (!fs.existsSync(envPath)) return;
+    for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
+      const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/i);
+      if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, '');
+    }
+  } catch {}
+})();
 
 // ── JWT ───────────────────────────────────────────────────────────────────────
 function makeToken(userId) {
@@ -269,6 +283,94 @@ const server = http.createServer(async (req, res) => {
     const ownerName = getFriends('mock-user-001').find(f => f.id === ownerId)?.display_name
       ?? (ownerId === 'user-jhanvi' ? 'Jhanvi' : ownerId === 'mock-user-001' ? 'You' : 'A friend');
     respond(res, 200, { owner_name: ownerName, code, member_count: (friendStore.friends[ownerId]?.length ?? 0) + 1 }); return;
+  }
+
+  // ── AI chat (Gemini-powered) ─────────────────────────────────────────────
+  if (url === '/ai/chat' && method === 'POST') {
+    const body = await readBody(req);
+    const question = (body.question || '').trim();
+    const ctx = body.context || {};
+    if (!question) { respond(res, 400, { error: 'question required' }); return; }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      respond(res, 500, { answer: 'AI is not configured — missing GEMINI_API_KEY on the server.' });
+      return;
+    }
+
+    // Build rich context the model can actually reason over
+    const me = MOCK_LEADERBOARD.entries.find(e => e.rank === MOCK_LEADERBOARD.your_rank);
+    const sectorCounts = {};
+    for (const p of MOCK_PORTFOLIO.positions) {
+      const card = CARDS.find(c => c.ticker === p.ticker);
+      const s = card?.sector || 'Unknown';
+      sectorCounts[s] = (sectorCounts[s] || 0) + 1;
+    }
+
+    const systemPrompt = `You are StockSwipe AI — a friendly, concise portfolio analyst inside a swipe-based paper-trading app.
+
+RULES:
+- Use ONLY the data provided below. Do not invent positions, prices, or returns.
+- Be concrete: cite tickers, sectors, return %, coin amounts when relevant.
+- Keep answers under 130 words. Use **bold** for key numbers and short bullet points.
+- Never give buy/sell advice. Frame insights as observations about the user's behavior or simulated portfolio.
+- Always end relevant answers with a tiny disclaimer: "Paper trading only — not financial advice."
+- If a question can't be answered from the data, say so briefly and suggest what to ask instead.
+
+USER CONTEXT:
+- Streak: ${ctx.streak_days ?? 0} days
+- Coin balance: ${ctx.coin_balance ?? 0}
+- Total swipes: ${ctx.swipe_count ?? 0}
+- Avg card score swiped right: ${ctx.avg_score ?? 'unknown'}
+- Leaderboard rank: ${MOCK_LEADERBOARD.your_rank} of ${MOCK_LEADERBOARD.entries.length}${me ? ` — you are listed as "${me.display_name}" with ${me.total_return}% return` : ''}
+
+LEADERBOARD TOP 10:
+${MOCK_LEADERBOARD.entries.slice(0, 10).map(e => `  ${e.rank}. ${e.display_name} — ${e.total_return}% return, ${e.swipe_count} swipes`).join('\n')}
+
+PAPER PORTFOLIO:
+- Total return: ${MOCK_PORTFOLIO.total_return}% | Hit rate: ${(MOCK_PORTFOLIO.hit_rate * 100).toFixed(0)}%
+- Best call: ${MOCK_PORTFOLIO.best_call.ticker} (+${MOCK_PORTFOLIO.best_call.return_pct}%)
+- Worst call: ${MOCK_PORTFOLIO.worst_call.ticker} (${MOCK_PORTFOLIO.worst_call.return_pct}%)
+- Positions: ${MOCK_PORTFOLIO.positions.map(p => `${p.ticker} ${p.return_pct >= 0 ? '+' : ''}${p.return_pct}%`).join(', ')}
+- Sector concentration: ${Object.entries(sectorCounts).map(([s, n]) => `${s}: ${n}`).join(', ')}
+
+ACTIVE BOUNTIES: ${MOCK_BOUNTIES.filter(b => !b.settled).map(b => `${b.ticker} (${b.bet_coins}c, ${b.direction}, ${b.current_return}%)`).join('; ') || 'none'}
+
+WEEKLY MISSIONS: ${getMissions().map(m => `${m.title} (${m.progress}/${m.target}, ${m.reward}c)`).join('; ')}
+
+STREAK TIERS: 0–6 = Starter, 7–29 = 🔥 Neon, 30–99 = ⭐ Gold, 100+ = 🏆 Legend`;
+
+    try {
+      const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const r = await fetch(geminiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: [{ role: 'user', parts: [{ text: question }] }],
+          generationConfig: {
+            temperature: 0.6,
+            maxOutputTokens: 1024,
+            thinkingConfig: { thinkingBudget: 0 },
+          },
+        }),
+      });
+      const data = await r.json();
+      if (!r.ok) {
+        console.error('[ai] Gemini error:', data);
+        respond(res, 502, { answer: `AI service error: ${data?.error?.message || r.statusText}` });
+        return;
+      }
+      const answer = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
+                  || "I couldn't generate a response — try rephrasing your question.";
+      console.log(`[ai] Q: "${question.slice(0, 60)}…"  →  ${answer.length} chars`);
+      respond(res, 200, { answer, disclaimer: DISCLAIMER });
+    } catch (e) {
+      console.error('[ai] fetch failed:', e);
+      respond(res, 500, { answer: 'AI service is temporarily unavailable. Please try again.' });
+    }
+    return;
   }
 
   respond(res, 404, { detail:'Not found' });
