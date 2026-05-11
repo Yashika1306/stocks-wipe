@@ -154,17 +154,19 @@ export function AIAssistant() {
       );
       setMessages(prev => [...prev, { role: 'assistant', text: data.answer }]);
     } catch (err: unknown) {
-      // If the backend is down, generate a basic local response so the UI never dead-ends
+      // Surface the server's actual error message when available (e.g. "missing GEMINI_API_KEY")
+      const serverAnswer = (err as { response?: { data?: { answer?: string } } })?.response?.data?.answer;
       const q = question.toLowerCase();
-      let fallback = "I'm having trouble reaching the analysis engine right now. Try again in a moment!";
+      let fallback = serverAnswer
+        ?? "I'm having trouble reaching the analysis engine right now. Try again in a moment!";
 
-      if (q.includes('streak') || q.includes('tier')) {
+      if (!serverAnswer && (q.includes('streak') || q.includes('tier'))) {
         const streak = context.streak_days;
         const tier   = streak >= 100 ? '🏆 Legend' : streak >= 30 ? '⭐ Gold' : streak >= 7 ? '🔥 Neon' : 'Starter';
         fallback = `🔥 **Streak Status**\n\nYou're on a **${streak}-day streak** — currently **${tier} Tier**.\n\n${streak >= 7 ? 'Keep it up!' : `${7 - streak} more days to reach Neon tier.`}`;
-      } else if (q.includes('coin') || q.includes('bounty')) {
+      } else if (!serverAnswer && (q.includes('coin') || q.includes('bounty'))) {
         fallback = `🪙 **Coin Balance**\n\nYou have **${context.coin_balance} coins**. Bet 10–15% of your balance per bounty on cards scoring above 65 for best expected value.`;
-      } else if (q.includes('mission')) {
+      } else if (!serverAnswer && q.includes('mission')) {
         fallback = `🎯 **Mission Tip**\n\nFocus on one sector mission at a time — Technology and Healthcare have the most cards in the feed, so they complete fastest.`;
       }
 
